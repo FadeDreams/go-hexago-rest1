@@ -1,0 +1,57 @@
+# Compiled Go binary
+*.exe
+*.test
+*.prof
+*.out
+*.cprof
+*.cprof[1-7]
+
+# Dependency directories
+/vendor/
+/Godeps/
+/_vendor/
+/vendor.json
+/vendor.lock
+
+# The binary and assets directories from go-bindata
+/bindata_assetfs/
+
+# Go 1.11 modules
+/go.sum
+
+# Output of the go coverage tool
+/coverage.txt
+
+# Output of the old code coverage tool
+/c.out
+
+# Cross-compiled binaries
+*.cgo1.go
+*.cgo2.c
+_cgo_exports
+_cgo_flags
+
+# Output of golangci-lint
+/golangci-lint-report.xml
+
+# Output of gofmt
+/gofmt-report.json
+
+# Output of go vet
+/govet-report.txt
+
+# Temporary files produced by text editors or build system
+*~
+
+# Application binary
+myapp
+
+# Vim swap files
+*.swp
+*.vim
+
+# JetBrains IDE .idea folder
+.idea/
+
+
+

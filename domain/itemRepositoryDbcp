@@ -1,0 +1,111 @@
+package domain
+
+import (
+	"database/sql"
+	"log"
+	"time"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+type itemRepositoryDb struct {
+	client *sql.DB
+}
+
+func (d itemRepositoryDb) FindAll() ([]Item, error) {
+	findAllSql := "SELECT item_id, name, description, quantity, color, status FROM items"
+
+	rows, err := d.client.Query(findAllSql)
+	if err != nil {
+		log.Println("Error while querying items table: " + err.Error())
+		return nil, err
+	}
+
+	items := make([]Item, 0)
+	for rows.Next() {
+		var c Item
+		err := rows.Scan(&c.Id, &c.Name, &c.Description, &c.Quantity, &c.Color, &c.Status)
+		if err != nil {
+			log.Println("Error while scanning items: " + err.Error())
+			return nil, err
+		}
+		items = append(items, c)
+	}
+	return items, nil
+}
+
+func (d itemRepositoryDb) InsertItem(item Item) error {
+	insertSQL := "INSERT INTO items (item_id, name, description, quantity, color, status) VALUES (?, ?, ?, ?, ?, ?)"
+	_, err := d.client.Exec(insertSQL, item.Id, item.Name, item.Description, item.Quantity, item.Color, item.Status)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d itemRepositoryDb) FindItemByID(itemID string) (Item, error) {
+	findItemByIDSql := "SELECT item_id, name, description, quantity, color, status FROM items WHERE item_id = ?"
+	var c Item
+
+	err := d.client.QueryRow(findItemByIDSql, itemID).
+		Scan(&c.Id, &c.Name, &c.Description, &c.Quantity, &c.Color, &c.Status)
+
+	if err != nil {
+		log.Println("Error while querying item by ID: " + err.Error())
+		return Item{}, err
+	}
+
+	return c, nil
+}
+
+func (d itemRepositoryDb) UpdateItemByID(itemID string, updatedItem Item) error {
+	updateSQL := `
+        UPDATE items
+        SET name = ?, description = ?, quantity = ?, color = ?, status = ?
+        WHERE item_id = ?
+    `
+	_, err := d.client.Exec(updateSQL, updatedItem.Name, updatedItem.Description, updatedItem.Quantity, updatedItem.Color, updatedItem.Status, itemID)
+	if err != nil {
+		log.Println("Error while updating item by ID: " + err.Error())
+		return err
+	}
+	return nil
+}
+
+func NewItemRepositoryDb() itemRepositoryDb {
+	client, err := sql.Open("sqlite3", "sqlite.db")
+	if err != nil {
+		panic(err)
+	}
+
+	createTableSQL := `
+        CREATE TABLE IF NOT EXISTS items (
+            item_id TEXT PRIMARY KEY,
+            name TEXT,
+            description TEXT,
+            quantity TEXT,
+            color TEXT,
+            status TEXT
+        )
+    `
+	_, err = client.Exec(createTableSQL)
+	if err != nil {
+		panic(err)
+	}
+
+	client.SetConnMaxLifetime(time.Minute * 3)
+	client.SetMaxOpenConns(10)
+	client.SetMaxIdleConns(10)
+
+	return itemRepositoryDb{client}
+}
+
+func (d itemRepositoryDb) DeleteItemByID(itemID string) error {
+	deleteSQL := "DELETE FROM items WHERE item_id = ?"
+	_, err := d.client.Exec(deleteSQL, itemID)
+	if err != nil {
+		log.Println("Error while deleting item by ID: " + err.Error())
+		return err
+	}
+	return nil
+}
