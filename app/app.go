@@ -7,6 +7,19 @@ import (
 	"github.com/fadedreams/go_hexagonal_rest/domain"
 	"github.com/fadedreams/go_hexagonal_rest/service"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+)
+
+package app
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/fadedreams/go_hexagonal_rest/domain"
+	"github.com/fadedreams/go_hexagonal_rest/service"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func Start() {
@@ -29,3 +42,4 @@ func Start() {
 	// starting server
 	log.Fatal(http.ListenAndServe("0.0.0.0:8080", router))
 }
+
